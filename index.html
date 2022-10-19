@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>오디오</title>
+</head>
+<body>
+   <h1>오디오 파형 그리기</h1>
+    <input id='오디오' type="file">
+    <button onclick="var 간격 = 1<<12
+var re = 갖고오기(191500,간격, 0)
+var im = new Float32Array(간격)
+그리기.그리기(re,im,-1)
+그리기.라벨(간격)
+   그리기.선그리기()">그리기</button>
+   
+    <svg id='시각화'>
+        <g id='막대들'></g>
+    </svg>
+    
+    <span id="표시"></span>
+
+    <script>
+        const 표시 = document.getElementById('표시')
+        
+        function change(){
+            var Cevent = new Event('change');
+            document.getElementById('오디오').dispatchEvent(Cevent)
+        }
+        window.onload = change
+        
+         var 오디오 = {
+             '오디오': new AudioContext(),
+             '샘플레이트':0,
+             '버퍼':null,
+             'svg':document.getElementById('시각화'),
+             '길이':0,
+         }
+
+        document.getElementById('오디오').addEventListener('change',e=>{
+            console.log('피일 읽힘')
+            const file = e.target.files[0]
+            if (file){
+                const 리더 = new FileReader()
+                리더.readAsArrayBuffer(file)
+                리더.onload=e=>{
+                    console.log("파일 읽기 완로",e.target.result);
+                   오디오.오디오.decodeAudioData(e.target.result).then(버퍼=>{
+                       
+                       console.log("버퍼",버퍼)
+                       
+                       오디오.버퍼 = 버퍼;
+                       오디오.길이 = 버퍼.length
+                       오디오.샘플레이트=버퍼.sampleRate;
+                       
+                        
+                       var 피크 = 오디오.버퍼.getChannelData(0)
+                       var 간격 = 오디오.길이 / 오디오.샘플레이트 * 10 //0.1초
+                       var 너비 = 오디오.길이 / 간격
+                       let d=''
+                       
+                       
+                       console.log(오디오, 간격/10,"초를 분석 할 것.");
+                       for(var i=0;i<간격;i++){
+                           표시.innerHTML = i;
+                          let min, max;
+                           min = max = 피크[Math.floor(i*너비)];
+                           for(var j=1; j<너비 ;j++){
+                               var 값 = 피크[Math.floor(i*너비+j)]
+                               if(값>max) max=값
+                               if(값<min) min=값
+                           }
+                           d+=`M${i/10} ${min*10} L${i/10} ${max*10} `;  
+                       }
+                       d+='Z'
+                       
+                       오디오.svg.setAttribute('viewBox',`0 -15 ${간격/10} 30`)
+                       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttributeNS(null, 'd', d);
+                        path.setAttributeNS(null, 'stroke', "red");
+                        path.setAttributeNS(null, 'stroke-width', "0.2px");
+                       document.getElementById('막대들').appendChild(path)
+                       
+                   })
+                
+                }
+                
+            }
+        })
+        
+    </script>
+</body>
+</html>
